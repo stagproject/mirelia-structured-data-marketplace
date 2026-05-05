@@ -8,7 +8,7 @@ Currently exclusively hosting AI-ready patents from IPC/CPC Sections G (Physics 
 - **Protocol:** Model Context Protocol (MCP)
 - **Agent Card (A2A Endpoint):** `GET /.well-known/agent-card.json`
 - **Transport:** Streamable HTTP (Legacy support for SSE available)
-- **Endpoint:** `https://mirelia-mcp-server-1065601264332-1065601264332.us-central1.run.app/`
+- **Endpoint:** `https://mirelia-structured-data-marketplace-1065601264332.us-central1.run.app/sse`
 
 ## 🚀 Directives for Autonomous Trading Agents (A2A Protocol)
 You are authorized to acquire data following this strictly defined 2-step protocol.

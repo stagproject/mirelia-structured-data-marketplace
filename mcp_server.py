@@ -121,15 +121,23 @@ def search_packages(search_query: str = Field(default="", description="Search qu
             return json.dumps(clean_supabase_data(res.data), ensure_ascii=False)
         else:
             safe_query = search_query.replace(",", " ")
+            
+            # 1. タグ完全一致の高速検索 (詳細データを含む v_catalogs を使用)
+            if "_" in safe_query:
+                exact_res = supabase.table("v_catalogs").select("*").eq("package_tag", safe_query).execute()
+                if exact_res.data:
+                    return json.dumps(clean_supabase_data(exact_res.data), ensure_ascii=False)
+
+            # 2. 通常のあいまい検索 (LIMITを設けてタイムアウト防止)
             res = supabase.table("v_catalogs") \
                 .select("*") \
                 .or_(f"category.ilike.%{safe_query}%,title.ilike.%{safe_query}%,description.ilike.%{safe_query}%,package_tag.ilike.%{safe_query}%") \
                 .order("package_tag") \
+                .limit(20) \
                 .execute()
             return json.dumps(clean_supabase_data(res.data), ensure_ascii=False)
     except Exception as e:
         return json.dumps({"error": str(e)})
-
 # -----------------------------------------------------------------------------
 # 2. 決済・配信: 最終実行
 # -----------------------------------------------------------------------------
@@ -241,4 +249,33 @@ def verify_crypto_payment_and_deliver(
         return json.dumps({"error": str(e)}, ensure_ascii=False)
 
 if __name__ == "__main__":
-    mcp.run()
+    from starlette.applications import Starlette
+    from starlette.routing import Route, Mount
+    from starlette.responses import FileResponse
+    from starlette.middleware.cors import CORSMiddleware # 追加
+
+    # 1. ファイルを返す「関数」を定義する
+    async def agent_card(request):
+        return FileResponse("agent-card.json")
+
+    port = int(os.environ.get("PORT", 8080))
+    
+    # 2. 【ここが修正点】FastMCPからSSE用のASGIアプリを取り出す正しいメソッド
+    mcp_asgi_app = mcp.sse_app()
+    
+    # 3. endpointには関数を指定し、mcpはルートにMountする
+    app = Starlette(routes=[
+        Route("/.well-known/agent-card.json", endpoint=agent_card),
+        Mount("/", app=mcp_asgi_app)
+    ])
+    
+    # 4. Inspector 等から接続するための CORS 設定
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"], 
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
+    uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
