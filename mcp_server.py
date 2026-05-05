@@ -79,15 +79,30 @@ else:
     WALLET_ADDRESS = None
 
 # -----------------------------------------------------------------------------
+# ユーティリティ: Supabaseのエスケープ配列文字列をネイティブなJSON配列にパース
+# -----------------------------------------------------------------------------
+def clean_supabase_data(rows):
+    array_fields = ['assignee', 'inventor', 'secondary_cpcs', 'attr_tech_stack', 'tech_stacks', 'biz_target_ind', 'attr_performance', 'package_tags', 'cited_patents']
+    for row in rows:
+        for field in array_fields:
+            if field in row and isinstance(row[field], str):
+                try:
+                    row[field] = json.loads(row[field])
+                except Exception:
+                    pass
+    return rows
+
+# -----------------------------------------------------------------------------
 # 1. 探索・詳細確認・重複確認 統合ツール (Hybrid Discovery)
 # -----------------------------------------------------------------------------
 @mcp.tool()
-def search_packages(search_query: str = Field(default="", description="Search query. Leave blank for all packages.")) -> str:
+def search_packages(search_query: str = Field(default="", description="Search query. Use keywords like 'USPTO', 'G01', 'Physics', or 'Electricity'. Leave blank for all packages.")) -> str:
     """
     [COST: FREE]
-    The primary marketplace exploration tool.
-    - If search_query is empty: Returns the full lightweight inventory (tags, titles, tech_stacks, prices) sorted by tag.
-    - If search_query is provided: Returns detailed info including 'description' and 'patent_ids' for deduplication.
+    The primary marketplace exploration tool for USPTO structured patent data.
+    Currently focuses on IPC Sections G (Physics, e.g., G01) and H (Electricity, e.g., H04).
+    - If search_query is empty: Returns the full inventory (tags, titles, tech_stacks, prices) sorted by tag.
+    - If search_query is provided: Returns detailed JSON info including 'description' and 'patent_ids' for deduplication.
     """
     if not supabase:
         return json.dumps({"error": "Database connection failed"})
@@ -103,7 +118,7 @@ def search_packages(search_query: str = Field(default="", description="Search qu
                 .select("package_tag, category, title, record_count, price_usd, avg_importance_p, tech_stacks") \
                 .order("package_tag") \
                 .execute()
-            return json.dumps(res.data, ensure_ascii=False)
+            return json.dumps(clean_supabase_data(res.data), ensure_ascii=False)
         else:
             safe_query = search_query.replace(",", " ")
             res = supabase.table("v_catalogs") \
@@ -111,18 +126,26 @@ def search_packages(search_query: str = Field(default="", description="Search qu
                 .or_(f"category.ilike.%{safe_query}%,title.ilike.%{safe_query}%,description.ilike.%{safe_query}%,package_tag.ilike.%{safe_query}%") \
                 .order("package_tag") \
                 .execute()
-            return json.dumps(res.data, ensure_ascii=False)
+            return json.dumps(clean_supabase_data(res.data), ensure_ascii=False)
     except Exception as e:
         return json.dumps({"error": str(e)})
 
 # -----------------------------------------------------------------------------
-# 2. 決済・配信: 最終実行 (堅牢版ロジックを完全維持)
+# 2. 決済・配信: 最終実行
 # -----------------------------------------------------------------------------
 @mcp.tool()
-def verify_crypto_payment_and_deliver(tx_hash: str, package_tag: str, network: str) -> str:
+def verify_crypto_payment_and_deliver(
+    tx_hash: str = Field(description="The transaction hash of the completed payment."),
+    package_tag: str = Field(description="The tag of the package to purchase."),
+    network: str = Field(description="The blockchain network used. Must be 'base', 'polygon', or 'oasis'.")
+) -> str:
     """
     [COST: PAID / FINAL EXECUTION]
     Verifies an on-chain cryptocurrency transaction and delivers the full JSON dataset CDN URL. 
+    Supported networks and currencies:
+    - 'base': USDC
+    - 'polygon': USDC
+    - 'oasis': ROSE
     WARNING: Do NOT call this tool until you have successfully executed the blockchain transaction and obtained a valid 'tx_hash'. 
     """
     if not supabase:
@@ -211,7 +234,7 @@ def verify_crypto_payment_and_deliver(tx_hash: str, package_tag: str, network: s
         
         return json.dumps({
             "system_log": f"Payment verified on {network.upper()}.",
-            "package_data": res_data.data
+            "package_data": clean_supabase_data(res_data.data)
         }, ensure_ascii=False)
 
     except Exception as e:
