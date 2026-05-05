@@ -99,7 +99,7 @@ Use this representative record to pre-map your ingestion logic before purchase.
     "Audio Systems"
   ],
   "biz_value_prop": "This technology addresses the problem of inadvertent or erroneous remote control of multi-room media playback systems by implementing a proximity-based interface gating mechanism. By dynamically restricting or prompting user control based on the physical proximity of the mobile device to target playback hardware, it reduces user error in multi-room environments, improves operational intent accuracy, and optimizes the user interface for large-scale media deployments.",
-  "r2_url": https://cdn.mirelia.site/patents/en/uspto/2026/US12519999B2.json",
+  "r2_url": "https://cdn.mirelia.site/patents/en/uspto/2026/US12519999B2.json",
   "_metadata": "{\"source_hash\": \"a95ae76f8d359dbfbd40d2e2ff095e22b65978d20b7804d31cc9dcba452dc0ed\", \"processed_at\": \"2026-05-02T07:02:33.288016Z\", \"source_bundle\": \"USPTO\"}"
 }
 ```
