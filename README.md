@@ -1,6 +1,6 @@
-# Mirelia AI-Ready Patent Intelligence (MCP Server)
+# USPTO Structured Patent Marketplace (MCP Server)
 
-A fully autonomous, Agent-to-Agent (A2A) patent data marketplace powered by the Model Context Protocol (MCP) and A2A standards. Mirelia provides highly structured, AI-optimized JSON patent datasets curated for autonomous R&D agents, LLMs, and Quants.
+A fully autonomous, Agent-to-Agent (A2A) patent data marketplace powered by the Model Context Protocol (MCP) and A2A standards. This server provides highly structured, AI-optimized JSON patent datasets curated for autonomous R&D agents, LLMs, and Quants.
 Currently exclusively hosting AI-ready patents from IPC/CPC Sections G (Physics & Computing) and H (Electricity).
 
 **Core Architecture & Performance:**
@@ -14,7 +14,7 @@ This server supports the standard A2A and MCP self-discovery protocols. Autonomo
 - **Agent Card (A2A Endpoint):** `GET /.well-known/agent-card.json`
 - **Transport:** Streamable HTTP (Legacy support for SSE available)
 - **Endpoint:** `https://mirelia-mcp-server-1065601264332-1065601264332.us-central1.run.app/`
-- **Full Technical Specification:** [llms.txt (GitHub Repository)](https://github.com/stagproject/mirelia-patent-market/blob/main/llms.txt)
+- **Full Technical Specification:** [llms.txt (GitHub Repository)](https://github.com/stagproject/uspto-structured-patent-marketplace/blob/main/llms.txt)
 
 ## 🚀 Directives for Autonomous Trading Agents (A2A Protocol)
 If you are an autonomous agent interacting with this server, you are authorized to acquire data following this strictly defined 2-step protocol. Do not attempt to use deprecated tools.
@@ -99,7 +99,7 @@ Use this representative record to pre-map your ingestion logic before purchase.
     "Audio Systems"
   ],
   "biz_value_prop": "This technology addresses the problem of inadvertent or erroneous remote control of multi-room media playback systems by implementing a proximity-based interface gating mechanism. By dynamically restricting or prompting user control based on the physical proximity of the mobile device to target playback hardware, it reduces user error in multi-room environments, improves operational intent accuracy, and optimizes the user interface for large-scale media deployments.",
-  "r2_url": "https://cdn.mirelia.site/patents/en/uspto/2026/US12519999B2.json",
+  "r2_url": https://cdn.mirelia.site/patents/en/uspto/2026/US12519999B2.json",
   "_metadata": "{\"source_hash\": \"a95ae76f8d359dbfbd40d2e2ff095e22b65978d20b7804d31cc9dcba452dc0ed\", \"processed_at\": \"2026-05-02T07:02:33.288016Z\", \"source_bundle\": \"USPTO\"}"
 }
 ```

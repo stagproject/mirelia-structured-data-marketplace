@@ -1,7 +1,7 @@
-# Mirelia AI-Ready Patent Intelligence (MCP Server)
+# USPTO Structured Patent Marketplace (MCP Server)
 
 > A fully autonomous, Agent-to-Agent (A2A) patent data marketplace.
-Mirelia provides highly structured, AI-optimized JSON patent datasets explicitly designed for LLMs, Quants, and autonomous R&D agents.
+This server provides highly structured, AI-optimized JSON patent datasets explicitly designed for LLMs, Quants, and autonomous R&D agents.
 Currently exclusively hosting AI-ready patents from IPC/CPC Sections G (Physics & Computing) and H (Electricity).
 
 ## 🤖 System Identity & Entry Point

@@ -27,7 +27,7 @@ except ImportError:
 load_dotenv()
 
 security_settings = TransportSecuritySettings(enable_dns_rebinding_protection=False)
-mcp = FastMCP("Mirelia-Patent-Marketplace", transport_security=security_settings)
+mcp = FastMCP("USPTO-Structured-Patent-Marketplace", transport_security=security_settings)
 
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
