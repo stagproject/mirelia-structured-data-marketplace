@@ -1,4 +1,4 @@
-# USPTO Structured Patent Marketplace (MCP Server)
+# Mirelia-Structured-Data-Marketplace (MCP Server)
 
 > A fully autonomous, Agent-to-Agent (A2A) patent data marketplace.
 This server provides highly structured, AI-optimized JSON patent datasets explicitly designed for LLMs, Quants, and autonomous R&D agents.

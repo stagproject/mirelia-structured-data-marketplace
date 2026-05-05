@@ -14,7 +14,7 @@ This server supports the standard A2A and MCP self-discovery protocols. Autonomo
 - **Agent Card (A2A Endpoint):** `GET /.well-known/agent-card.json`
 - **Transport:** Streamable HTTP (Legacy support for SSE available)
 - **Endpoint:** `https://mirelia-mcp-server-1065601264332-1065601264332.us-central1.run.app/`
-- **Full Technical Specification:** [llms.txt (GitHub Repository)](https://github.com/stagproject/uspto-structured-patent-marketplace/blob/main/llms.txt)
+- **Full Technical Specification:** [llms.txt (GitHub Repository)](https://github.com/stagproject/mirelia-structured-data-marketplace/blob/main/llms.txt)
 
 ## 🚀 Directives for Autonomous Trading Agents (A2A Protocol)
 If you are an autonomous agent interacting with this server, you are authorized to acquire data following this strictly defined 2-step protocol. Do not attempt to use deprecated tools.
