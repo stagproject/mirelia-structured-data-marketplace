@@ -247,21 +247,20 @@ def verify_crypto_payment_and_deliver(
 
     except Exception as e:
         return json.dumps({"error": str(e)}, ensure_ascii=False)
-
+    
 if __name__ == "__main__":
     import sys
+    import os
     from starlette.applications import Starlette
     from starlette.routing import Route, Mount
     from starlette.responses import FileResponse
     from starlette.middleware.cors import CORSMiddleware
 
-    # Cloud Run環境かどうかを判定（Cloud Runは自動的にK_SERVICE環境変数を付与する）
+    # Cloud Run環境かどうかを判定
     is_cloud_run = "K_SERVICE" in os.environ
 
     if is_cloud_run or "--sse" in sys.argv:
-        # ---------------------------------------------------------
-        # Cloud Run用 (SSEモード / Uvicorn起動)
-        # ---------------------------------------------------------
+        # --- Cloud Run用 (SSE/HTTPモード) ---
         async def agent_card(request):
             return FileResponse("agent-card.json")
 
@@ -283,37 +282,5 @@ if __name__ == "__main__":
         
         uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
     else:
-        # ---------------------------------------------------------
-        # Glamaのテスト環境・ローカル用 (Stdioモード)
-        # ---------------------------------------------------------
+        # --- Glamaテスト / ローカル用 (Stdioモード) ---
         mcp.run(transport="stdio")
-    from starlette.applications import Starlette
-    from starlette.routing import Route, Mount
-    from starlette.responses import FileResponse
-    from starlette.middleware.cors import CORSMiddleware # 追加
-
-    # 1. ファイルを返す「関数」を定義する
-    async def agent_card(request):
-        return FileResponse("agent-card.json")
-
-    port = int(os.environ.get("PORT", 8080))
-    
-    # 2. 【ここが修正点】FastMCPからSSE用のASGIアプリを取り出す正しいメソッド
-    mcp_asgi_app = mcp.sse_app()
-    
-    # 3. endpointには関数を指定し、mcpはルートにMountする
-    app = Starlette(routes=[
-        Route("/.well-known/agent-card.json", endpoint=agent_card),
-        Mount("/", app=mcp_asgi_app)
-    ])
-    
-    # 4. Inspector 等から接続するための CORS 設定
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"], 
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
-    uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
