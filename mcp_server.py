@@ -249,6 +249,44 @@ def verify_crypto_payment_and_deliver(
         return json.dumps({"error": str(e)}, ensure_ascii=False)
 
 if __name__ == "__main__":
+    import sys
+    from starlette.applications import Starlette
+    from starlette.routing import Route, Mount
+    from starlette.responses import FileResponse
+    from starlette.middleware.cors import CORSMiddleware
+
+    # Cloud Run環境かどうかを判定（Cloud Runは自動的にK_SERVICE環境変数を付与する）
+    is_cloud_run = "K_SERVICE" in os.environ
+
+    if is_cloud_run or "--sse" in sys.argv:
+        # ---------------------------------------------------------
+        # Cloud Run用 (SSEモード / Uvicorn起動)
+        # ---------------------------------------------------------
+        async def agent_card(request):
+            return FileResponse("agent-card.json")
+
+        port = int(os.environ.get("PORT", 8080))
+        mcp_asgi_app = mcp.sse_app()
+        
+        app = Starlette(routes=[
+            Route("/.well-known/agent-card.json", endpoint=agent_card),
+            Mount("/", app=mcp_asgi_app)
+        ])
+        
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"], 
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        
+        uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
+    else:
+        # ---------------------------------------------------------
+        # Glamaのテスト環境・ローカル用 (Stdioモード)
+        # ---------------------------------------------------------
+        mcp.run(transport="stdio")
     from starlette.applications import Starlette
     from starlette.routing import Route, Mount
     from starlette.responses import FileResponse
