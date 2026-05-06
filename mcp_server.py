@@ -265,13 +265,17 @@ if __name__ == "__main__":
             return FileResponse("agent-card.json")
 
         port = int(os.environ.get("PORT", 8080))
-        mcp_asgi_app = mcp.sse_app()
+        # 変更点1: sse_app() を streamable_http_app() に変更
+        mcp_asgi_app = mcp.streamable_http_app()
         
-        app = Starlette(routes=[
-            Route("/.well-known/agent-card.json", endpoint=agent_card),
-            Mount("/", app=mcp_asgi_app)
-        ])
-        
+        # 変更点2: lifespan=mcp_asgi_app.router.lifespan_context を追加
+        app = Starlette(
+            lifespan=mcp_asgi_app.router.lifespan_context,
+            routes=[
+                Route("/.well-known/agent-card.json", endpoint=agent_card),
+                Mount("/", app=mcp_asgi_app)
+            ]
+        )
         app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"], 
