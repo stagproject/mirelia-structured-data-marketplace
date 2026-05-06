@@ -1,5 +1,15 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "mirelia-structured-data-marketplace",
+  "keywords": [
+    "search",
+    "remote",
+    "database",
+    "blockchain",
+    "web3",
+    "uspto",
+    "crypto"
+  ],
   "maintainers": [
     "stagproject"
   ]
