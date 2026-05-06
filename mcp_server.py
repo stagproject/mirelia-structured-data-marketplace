@@ -248,6 +248,36 @@ def verify_crypto_payment_and_deliver(
     except Exception as e:
         return json.dumps({"error": str(e)}, ensure_ascii=False)
     
+# -----------------------------------------------------------------------------
+# 3. プロンプト: 商業的価値分析 (Commercial Value Analysis)
+# -----------------------------------------------------------------------------
+@mcp.prompt()
+def analyze_commercial_value(package_tag: str) -> str:
+    """
+    Generates a prompt for an LLM to deeply analyze the commercial potential of a specific patent dataset.
+    """
+    return (
+        f"Please deeply analyze the patent dataset labeled '{package_tag}'. "
+        f"Focus primarily on the 'biz_value_prop', 'biz_target_ind', and 'attr_tech_stack' fields. "
+        f"Your goal is to extract potential commercial applications, identify target industries for monetization, "
+        f"and summarize the specific ROI or business problems solved by these patents."
+    )
+
+# -----------------------------------------------------------------------------
+# 4. プロンプト: R&D・技術的ブレイクスルー分析 (R&D / Technical Breakthrough Analysis)
+# -----------------------------------------------------------------------------
+@mcp.prompt()
+def analyze_technical_breakthroughs(package_tag: str) -> str:
+    """
+    Generates a prompt for an LLM to deeply analyze the technical architecture and R&D value of a specific patent dataset.
+    """
+    return (
+        f"Please conduct a deep technical analysis of the patent dataset labeled '{package_tag}'. "
+        f"Focus primarily on the 'attr_tech_stack', 'primary_cpc', 'secondary_cpcs', and 'importance_p' fields. "
+        f"Your goal is to identify core technological breakthroughs, map out the architectural patterns, "
+        f"evaluate the structural claim strength, and highlight potential areas for future R&D or engineering development."
+    )
+    
 if __name__ == "__main__":
     import sys
     import os
