@@ -277,6 +277,36 @@ def analyze_technical_breakthroughs(package_tag: str) -> str:
         f"Your goal is to identify core technological breakthroughs, map out the architectural patterns, "
         f"evaluate the structural claim strength, and highlight potential areas for future R&D or engineering development."
     )
+
+# -----------------------------------------------------------------------------
+# 5. リソース: システム要件と対応カタログ (System Capabilities & Requirements)
+# -----------------------------------------------------------------------------
+@mcp.resource("system://capabilities")
+def get_system_capabilities() -> str:
+    """
+    Returns the read-only operational capabilities, supported networks, data sources,
+    and update frequency for the autonomous Agent-to-Agent (A2A) marketplace.
+    """
+    # グローバル変数として読み込まれている WALLET_ADDRESS を動的に使用（万が一未定義の場合はドキュメントのアドレスをフォールバック）
+    current_wallet = WALLET_ADDRESS if WALLET_ADDRESS else "0x27d2E76a67f5CD168B0184450e3f3e59B17Edef6"
+
+    return json.dumps({
+        "server_status": "operational",
+        "data_source": "USPTO (United States Patent and Trademark Office) / EPO",
+        "update_frequency": "Daily (Automated ETL pipeline processing up to 6,000+ XML documents daily)",
+        "inventory_status": "Continuously expanding AI-ready patent dataset",
+        "supported_networks": {
+            "base": "USDC (ERC-20)",
+            "polygon": "USDC (ERC-20)",
+            "oasis": "ROSE (Native)"
+        },
+        "target_sectors": {
+            "G": "Physics & Computing (e.g., G01, G05, G06, G11, G16)",
+            "H": "Electricity & Communication (e.g., H01, H04, H10)"
+        },
+        "protocol": "Model Context Protocol (MCP) / A2A Standard",
+        "payment_wallet": current_wallet
+    }, ensure_ascii=False)
     
 if __name__ == "__main__":
     import sys
