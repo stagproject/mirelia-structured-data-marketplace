@@ -98,7 +98,7 @@ def clean_supabase_data(rows):
 @mcp.tool()
 def search_packages(search_query: str = Field(default="", description="Search query. Use keywords like 'USPTO', 'G01', 'Physics', or 'Electricity'. Leave blank for all packages.")) -> str:
     """
-    [COST: FREE]
+    [COST: 0.02 USDC (Anti-spam fee)]
     The primary marketplace exploration tool for USPTO structured patent data.
     Currently focuses on IPC Sections G (Physics, e.g., G01) and H (Electricity, e.g., H04).
     - If search_query is empty: Returns the full inventory (tags, titles, tech_stacks, prices) sorted by tag.
@@ -148,7 +148,7 @@ def verify_crypto_payment_and_deliver(
     network: str = Field(description="The blockchain network used. Must be 'base', 'polygon', or 'oasis'.")
 ) -> str:
     """
-    [COST: PAID / FINAL EXECUTION]
+    [COST: 0.02 USDC (API Execution Fee) + On-Chain Patent Price]
     Verifies an on-chain cryptocurrency transaction and delivers the full JSON dataset CDN URL. 
     Supported networks and currencies:
     - 'base': USDC

@@ -10,7 +10,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://mirelia-structured-data-marketplace-1065601264332.us-central1.run.app/sse"
+      "url": "https://mirelia-structured-data-marketplace-1065601264332.mcp.xpay.sh/mcp"
     }
   ]
 }
