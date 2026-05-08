@@ -11,9 +11,10 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 
 from starlette.applications import Starlette
-from starlette.routing import Mount
+from starlette.routing import Route, Mount
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.responses import FileResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from web3 import Web3
 try:
@@ -22,7 +23,6 @@ try:
 except ImportError:
     # 旧バージョン互換用
     from web3.middleware import geth_poa_middleware as poa_middleware
-
 
 load_dotenv()
 
@@ -82,7 +82,8 @@ else:
 # ユーティリティ: Supabaseのエスケープ配列文字列をネイティブなJSON配列にパース
 # -----------------------------------------------------------------------------
 def clean_supabase_data(rows):
-    array_fields = ['assignee', 'inventor', 'secondary_cpcs', 'attr_tech_stack', 'tech_stacks', 'biz_target_ind', 'attr_performance', 'package_tags', 'cited_patents']
+    array_fields = ['assignee', 'inventor', 'secondary_cpcs', 'attr_tech_stack', 'tech_stacks', 
+                    'biz_target_ind', 'attr_performance', 'package_tags', 'cited_patents']
     for row in rows:
         for field in array_fields:
             if field in row and isinstance(row[field], str):
@@ -91,6 +92,13 @@ def clean_supabase_data(rows):
                 except Exception:
                     pass
     return rows
+
+# -----------------------------------------------------------------------------
+# MPP (Machine Payments Protocol) ミドルウェア
+# -----------------------------------------------------------------------------
+class MPPMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        return await call_next(request)
 
 # -----------------------------------------------------------------------------
 # 1. 探索・詳細確認・重複確認 統合ツール (Hybrid Discovery)
@@ -138,23 +146,25 @@ def search_packages(search_query: str = Field(default="", description="Search qu
             return json.dumps(clean_supabase_data(res.data), ensure_ascii=False)
     except Exception as e:
         return json.dumps({"error": str(e)})
+
 # -----------------------------------------------------------------------------
 # 2. 決済・配信: 最終実行
 # -----------------------------------------------------------------------------
 @mcp.tool()
 def verify_crypto_payment_and_deliver(
-    tx_hash: str = Field(description="The transaction hash of the completed payment."),
     package_tag: str = Field(description="The tag of the package to purchase."),
-    network: str = Field(description="The blockchain network used. Must be 'base', 'polygon', or 'oasis'.")
+    network: str = Field(description="The blockchain network used. Must be 'base', 'polygon', or 'oasis'."),
+    tx_hash: Optional[str] = Field(default=None, description="The transaction hash. LEAVE EMPTY to request payment details for autonomous agents.")
 ) -> str:
     """
     [COST: 0.02 USDC (API Execution Fee) + On-Chain Patent Price]
-    Verifies an on-chain cryptocurrency transaction and delivers the full JSON dataset CDN URL. 
+    Verifies an on-chain cryptocurrency transaction and delivers the full JSON dataset CDN URL.
     Supported networks and currencies:
     - 'base': USDC
     - 'polygon': USDC
     - 'oasis': ROSE
-    WARNING: Do NOT call this tool until you have successfully executed the blockchain transaction and obtained a valid 'tx_hash'. 
+    WARNING: For autonomous agents (MPP), leave tx_hash empty to retrieve 402 payment instructions.
+    Do NOT call with a tx_hash until you have successfully executed the blockchain transaction.
     """
     if not supabase:
         return json.dumps({"error": "Supabase connection failed"}, ensure_ascii=False)
@@ -162,6 +172,28 @@ def verify_crypto_payment_and_deliver(
     network = network.lower()
     if network not in chains:
         return json.dumps({"error": f"Unsupported or unconfigured network: {network}"}, ensure_ascii=False)
+
+    catalog_res = supabase.table("patent_packages").select("price_usd, sales_count").eq("package_tag", package_tag).execute()
+    if not catalog_res.data:
+        return json.dumps({"error": "Package not found"}, ensure_ascii=False)
+        
+    catalog_data = catalog_res.data[0]
+    real_price_usd = float(catalog_data['price_usd'])
+
+    # --- MPP (Machine Payments Protocol) 自律決済トリガー ---
+    if not tx_hash or tx_hash.strip() == "":
+        return json.dumps({
+            "status": 402,
+            "message": "Payment Required",
+            "payment_request": {
+                "mpp_version": "1.0",
+                "destination": WALLET_ADDRESS,
+                "amount": real_price_usd,
+                "asset": "USDC" if network != "oasis" else "ROSE",
+                "network": network,
+                "description": f"Purchase of Patent Package: {package_tag}"
+            }
+        }, ensure_ascii=False)
         
     tx_check = supabase.table("processed_transactions").select("tx_hash").eq("tx_hash", tx_hash).execute()
     if tx_check.data:
@@ -193,13 +225,6 @@ def verify_crypto_payment_and_deliver(
         current_time = int(time.time())
         if current_time - block['timestamp'] > 3600:
             return json.dumps({"error": "Transaction is expired. Must be executed within the last 1 hour."}, ensure_ascii=False)
-
-        catalog_res = supabase.table("patent_packages").select("price_usd, sales_count").eq("package_tag", package_tag).execute()
-        if not catalog_res.data:
-            return json.dumps({"error": "Package not found"}, ensure_ascii=False)
-            
-        catalog_data = catalog_res.data[0]
-        real_price_usd = float(catalog_data['price_usd'])
         
         payment_found = False
         
@@ -247,7 +272,7 @@ def verify_crypto_payment_and_deliver(
 
     except Exception as e:
         return json.dumps({"error": str(e)}, ensure_ascii=False)
-    
+
 # -----------------------------------------------------------------------------
 # 3. プロンプト: 商業的価値分析 (Commercial Value Analysis)
 # -----------------------------------------------------------------------------
@@ -287,7 +312,6 @@ def get_system_capabilities() -> str:
     Returns the read-only operational capabilities, supported networks, data sources,
     and update frequency for the autonomous Agent-to-Agent (A2A) marketplace.
     """
-    # グローバル変数として読み込まれている WALLET_ADDRESS を動的に使用（万が一未定義の場合はドキュメントのアドレスをフォールバック）
     current_wallet = WALLET_ADDRESS if WALLET_ADDRESS else "0x27d2E76a67f5CD168B0184450e3f3e59B17Edef6"
 
     return json.dumps({
@@ -304,10 +328,10 @@ def get_system_capabilities() -> str:
             "G": "Physics & Computing (e.g., G01, G05, G06, G11, G16)",
             "H": "Electricity & Communication (e.g., H01, H04, H10)"
         },
-        "protocol": "Model Context Protocol (MCP) / A2A Standard",
+        "protocol": "Model Context Protocol (MCP) / A2A Standard / MPP v1.0",
         "payment_wallet": current_wallet
     }, ensure_ascii=False)
-    
+
 if __name__ == "__main__":
     import sys
     import os
@@ -333,9 +357,10 @@ if __name__ == "__main__":
             lifespan=mcp_asgi_app.router.lifespan_context,
             routes=[
                 Route("/.well-known/agent-card.json", endpoint=agent_card),
-                Mount("/", app=mcp_asgi_app)
+                Mount("/mcp", app=mcp_asgi_app)
             ]
         )
+        app.add_middleware(MPPMiddleware)
         app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"], 
