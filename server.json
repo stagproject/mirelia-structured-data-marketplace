@@ -1,10 +1,10 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.stagproject/mirelia-structured-data-marketplace",
-  "version": "1.0.0",
-  "description": "Autonomous A2A patent data marketplace (USPTO/EPO) providing AI-optimized structured JSON. Continuously updated daily. Exclusively covers high-demand tech sectors: Physics & Computing (G01 Sensors, G06 AI/ML, G16 Health Informatics) and Electricity & Communications (H01 Semiconductors/Solid-State, H04 5G/6G, H10 Advanced Memory). Includes AI-enriched insights (biz_value_prop, attr_tech_stack). Supports instant on-chain M2M crypto transactions (Base/Polygon USDC, Oasis ROSE) for autonomous agents.",
+  "version": "1.1.1",
+  "description": "Autonomous A2A patent data marketplace (USPTO) providing AI-optimized structured JSON. Features 4 specialized tools for individual and bulk patent discovery/purchase. Includes AI-enriched insights (biz_value_prop, attr_tech_stack). Fully implements the MPP v1.0 402 Payment Flow. Universally supports both EOA (Base/Polygon USDC, Native ROSE) and AA/Smart Contract Wallets (automatic WROSE ERC20 routing) for instant on-chain M2M settlements.",
   "repository": {
-    "url": "https://github.com/mirelia-structured-data-marketplace",
+    "url": "https://github.com/stagproject/mirelia-structured-data-marketplace",
     "source": "github"
   },
   "remotes": [
