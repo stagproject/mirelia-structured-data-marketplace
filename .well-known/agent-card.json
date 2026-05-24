@@ -1,32 +1,40 @@
 {
-  "mcp_version": "1.0.0",
-  "name": "Mirelia-Structured-Data-Marketplace",
+  "name": "Mirelia Structured Data Marketplace",
   "version": "1.1.1",
-  "description": "Premium A2A marketplace for AI-ready, structured patent datasets (USPTO). Our datasets feature AI-enriched metadata: 'biz_value_prop', 'attr_tech_stack', and 'importance_p'. Explicitly optimized for autonomous R&D agents, RAG pipelines, and automated competitive intelligence. Specialized in G (Physics/IT) and H (Electricity/Telecom) sections. Supports instant M2M settlements via USDC (Base/Polygon). Universally compatible with both EOA (Native ROSE) and AA/Smart Contract Wallets via automatic WROSE (Wrapped ROSE) routing on Oasis Sapphire.",
+  "description": "USPTO patent MCP server for competitive intelligence, prior art search, and R&D scouting. AI-enriched JSON (biz_value_prop, attr_tech_stack, importance_p). 3000+ patents in CPC G/H. Pay-per-patent via x402 on Polygon, Base, or Oasis.",
+  "url": "https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp",
+  "repository": "https://github.com/stagproject/mirelia-structured-data-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "USPTO",
+    "patent",
+    "prior art",
+    "competitive intelligence",
+    "IP analytics",
+    "CPC",
+    "semiconductor",
+    "machine learning",
+    "x402",
+    "MCP"
+  ],
   "capabilities": {
     "tools": [
       {
         "name": "search_single_patents",
-        "description": "High-precision discovery tool for individual patent data ($0.50 each). Search by primary CPC codes (e.g., G01, G06), cross-domain CPCs, and keywords. Returns 'importance_p' and 'biz_target_ind' for ROI assessment."
+        "description": "USPTO patent search for competitive intelligence and prior art. Filter by CPC (G06, H04, etc.) and keywords. Returns importance_p and biz_target_ind."
       },
       {
         "name": "purchase_single_patent",
-        "description": "Atomic transaction tool for targeted acquisition. Facilitates 402 Payment Required flow. Supports Native ROSE (EOA) and WROSE (AA/Smart Contract) via pre-built transaction payloads. Returns the FULL structured JSON dataset."
+        "description": "Buy one USPTO patent dataset ($0.50 on-chain) with x402-style payment payloads. Full structured JSON delivery."
       },
       {
         "name": "search_packages",
-        "description": "Exploration tool for USPTO bulk patent datasets (10, 100, 1000 items per pack). Query by CPC codes or keywords. Returns price, patent counts, and AI summaries to enable autonomous large-scale evaluation."
+        "description": "Browse bulk USPTO patent packages (10/100/1000) for competitive intelligence and landscape analysis."
       },
       {
         "name": "verify_crypto_payment_and_deliver",
-        "description": "Final delivery mechanism for bulk packages. Facilitates 402 Payment Required flow for both EOA and AA wallets (USDC/ROSE/WROSE). Validates on-chain hashes and triggers instant delivery via secure CDN."
+        "description": "Purchase and deliver bulk USPTO patent packages after on-chain USDC/ROSE payment verification."
       }
     ]
-  },
-  "contact": {
-    "organization": "Mirelia",
-    "url": "https://mirelia.site",
-    "email": "support@mirelia.site"
-  },
-  "license": "MIT"
+  }
 }
