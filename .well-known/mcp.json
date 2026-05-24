@@ -1,0 +1,23 @@
+{
+  "name": "Mirelia Structured Data Marketplace",
+  "description": "USPTO patent search and purchase for AI agents: competitive intelligence, prior art, R&D scouting, IP analytics. 3000+ AI-enriched JSON patents (CPC G/H). x402 on-chain delivery.",
+  "url": "https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp",
+  "transport": "streamable-http",
+  "authentication": {
+    "type": "query",
+    "parameter": "key"
+  },
+  "repository": "https://github.com/stagproject/mirelia-structured-data-marketplace",
+  "keywords": [
+    "uspto",
+    "patent",
+    "prior-art",
+    "competitive-intelligence",
+    "ip-analytics",
+    "cpc",
+    "semiconductor",
+    "ai-ml",
+    "x402",
+    "mcp"
+  ]
+}
