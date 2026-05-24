@@ -1,7 +1,7 @@
 [project]
 name = "mirelia-patent-market"
 version = "1.0.0"
-description = "A2A Patent Data Marketplace MCP Server"
+description = "USPTO patent MCP server for competitive intelligence and prior art (xpay + x402)"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

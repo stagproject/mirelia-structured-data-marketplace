@@ -27,7 +27,20 @@ except ImportError:
 load_dotenv()
 
 security_settings = TransportSecuritySettings(enable_dns_rebinding_protection=False)
-mcp = FastMCP("Mirelia-Structured-Data-Marketplace", transport_security=security_settings)
+mcp = FastMCP(
+    "Mirelia USPTO Patent Marketplace",
+    instructions=(
+        "USPTO patent data for competitive intelligence, prior art search, and R&D scouting. "
+        "Use search_single_patents or search_packages first, then purchase with on-chain x402 flow."
+    ),
+    website_url="https://github.com/stagproject/mirelia-structured-data-marketplace",
+    transport_security=security_settings,
+)
+
+PUBLIC_MCP_URL = os.environ.get(
+    "PUBLIC_MCP_URL",
+    "https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp",
+)
 
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
@@ -130,10 +143,11 @@ def search_single_patents(
     offset: Optional[int] = Field(default=0, description="Number of results to skip for pagination (e.g., 20 for page 2).")
 ) -> str:
     """
-    [COST: 0.0001 USDC (API Fee)]
-    Searches for high-value individual patents ($0.50 each) from a continuously expanding, daily-updated USPTO database.
-    Returns lightweight evaluation data: [patent_id, title, importance_p, publication_date, primary_cpc, secondary_cpcs, biz_target_ind].
-    Supports pagination via the 'offset' parameter.
+    USPTO patent search for competitive intelligence, prior art, IP analytics, and R&D scouting.
+    [COST: low xpay per-call fee; $0.50 USDC on-chain per patent dataset if purchased]
+    Searches 3000+ AI-enriched USPTO patents ($0.50 each to buy full JSON). Daily-updated database.
+    Returns: patent_id, title, importance_p, publication_date, primary_cpc, secondary_cpcs, biz_target_ind.
+    Supports pagination via offset.
 
     [AVAILABLE PRIMARY CPCs]: 
     G01(Measurement/Testing), G02(Optics), G03(Photography), G04(Horology), G05(Control Systems), 
@@ -173,8 +187,9 @@ def purchase_single_patent(
     tx_hash: Optional[str] = Field(default=None, description="The transaction hash. LEAVE EMPTY first to retrieve payment instructions.")
 ) -> str:
     """
-    [COST: 0.0001 USDC (API Fee) + 0.50 USDC (Data Price)]
-    Verifies on-chain payment and delivers the FULL structured JSON dataset for a single patent.
+    USPTO patent purchase and delivery — prior art / competitive intelligence single-patent dataset.
+    [COST: xpay per-call + $0.50 USDC on-chain data price]
+    Delivers full structured JSON after on-chain payment verification.
 
     [AGENTIC WORKFLOW (MPP v1.0 402 Payment Flow)]:
     This is a mandatory 2-step process. Do NOT hallucinate a tx_hash.
@@ -347,9 +362,9 @@ def search_packages(
     limit: Optional[int] = Field(default=20, description="Number of results to return (max 100).")
 ) -> str:
     """
-    [COST: 0.0001 USDC (API Fee)]
-    Exploration tool for USPTO bulk patent datasets (10, 100, 1000 items per pack). 
-    Best for large-scale R&D or commercial analysis.
+    USPTO bulk patent package catalog for competitive intelligence and landscape analysis.
+    [COST: low xpay per-call fee]
+    Bulk datasets (10, 100, 1000 patents per pack). Large-scale R&D and IP analytics.
     If 'search_query' is empty, returns the full catalog of available packages.
     If 'search_query' contains a CPC or keyword, returns specific domain packs.
 
@@ -392,8 +407,9 @@ def verify_crypto_payment_and_deliver(
     tx_hash: Optional[str] = Field(default=None, description="Transaction hash. LEAVE EMPTY for 402 request.")
 ) -> str:
     """
-    [COST: 0.0001 USDC (API Fee) + Bulk Package Price]
-    Verifies on-chain payment and delivers the FULL JSON dataset URL for bulk packages.
+    USPTO bulk patent package purchase — competitive intelligence datasets with on-chain payment.
+    [COST: xpay per-call + package price on-chain]
+    Delivers full JSON package after payment verification.
 
     [AGENTIC WORKFLOW (MPP v1.0 402 Payment Flow)]:
     This is a mandatory 2-step process. Do NOT hallucinate a tx_hash.
@@ -561,19 +577,46 @@ if __name__ == "__main__":
 
         async def root_handler(request):
             from starlette.responses import JSONResponse
-            return JSONResponse({"status": "healthy"})
-        
-        async def agent_card(request):
-            from starlette.responses import FileResponse
-            return FileResponse(".well-known/agent-card.json")
+            if request.method == "POST":
+                try:
+                    payload = await request.json()
+                    print(f"[Webhook Received JSON] {payload}")
+                except Exception:
+                    raw_body = await request.body()
+                    print(f"[Webhook Received RAW] {raw_body}")
+                return JSONResponse({"status": "healthy"})
+            return JSONResponse({
+                "name": "Mirelia Structured Data Marketplace",
+                "status": "healthy",
+                "mcp_endpoint": PUBLIC_MCP_URL,
+                "public_connect_url": f"{PUBLIC_MCP_URL}?key=YOUR_XPAY_KEY",
+                "xpay_explore": "https://xpay.tools/explore",
+                "discovery": {
+                    "llms_txt": "/llms.txt",
+                    "skill_md": "/skill.md",
+                    "mcp_json": "/.well-known/mcp.json",
+                    "agent_card": "/.well-known/agent-card.json",
+                },
+                "keywords": [
+                    "USPTO", "patent", "prior art", "competitive intelligence", "IP analytics", "CPC", "x402",
+                ],
+            })
+
+        def _static_file(path: str, media_type: str):
+            async def handler(request):
+                return FileResponse(path, media_type=media_type)
+            return handler
 
         app = Starlette(
-            lifespan=mcp_asgi_app.router.lifespan_context,  # <- 500エラーの真因を解消する必須パラメータ
+            lifespan=mcp_asgi_app.router.lifespan_context,
             routes=[
-                Route("/", endpoint=root_handler),
-                Route("/.well-known/agent-card.json", endpoint=agent_card),
-                Mount("/", app=mcp_asgi_app)  # <- 内部で自動的に "/mcp" のルーティングが構築される
-            ]
+                Route("/", endpoint=root_handler, methods=["GET", "POST"]),
+                Route("/llms.txt", endpoint=_static_file("llms.txt", "text/plain; charset=utf-8")),
+                Route("/skill.md", endpoint=_static_file("skill.md", "text/markdown; charset=utf-8")),
+                Route("/.well-known/mcp.json", endpoint=_static_file(".well-known/mcp.json", "application/json")),
+                Route("/.well-known/agent-card.json", endpoint=_static_file(".well-known/agent-card.json", "application/json")),
+                Mount("/", app=mcp_asgi_app),
+            ],
         )
         
         # 成功したCORS設定（expose_headers）を維持

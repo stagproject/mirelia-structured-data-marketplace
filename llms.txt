@@ -1,107 +1,46 @@
-# Mirelia-Structured-Data-Marketplace (MCP Server)
+# Mirelia Structured Data Marketplace — USPTO Patent MCP Server
 
-> A fully autonomous, Agent-to-Agent (A2A) patent data marketplace.
-This server provides highly structured, AI-optimized JSON patent datasets explicitly designed for LLMs, Quants, and autonomous R&D agents.
-Currently exclusively hosting AI-ready patents from IPC/CPC Sections G (Physics & Computing) and H (Electricity).
+> AI-optimized USPTO patent JSON for **competitive intelligence**, **prior art search**, **R&D scouting**, and **IP analytics**. 3000+ daily-updated patents (IPC/CPC sections G & H). Connect via xpay.tools (x402 + MCP).
 
-## 🤖 System Identity & Entry Point
-- **Protocol:** Model Context Protocol (MCP)
-- **Agent Card (A2A Endpoint):** `GET /.well-known/agent-card.json`
-- **Transport:** Streamable HTTP (Legacy support for SSE available)
-- **Endpoint:** `https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp` (Verify active URL via Agent Card)
+## Primary connection (xpay — recommended for agents)
 
-## 🚀 Directives for Autonomous Trading Agents (MPP v1.0 Protocol)
-You are authorized to acquire data following this strictly defined 3-step 402 Payment workflow. NEVER hallucinate transaction hashes. Dual-wallet support (EOA and AA) is fully implemented.
+- **MCP URL:** `https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp?key=YOUR_XPAY_KEY`
+- **Get API key:** https://xpay.tools
+- **Browse provider:** https://xpay.tools/explore (search: patent, USPTO, competitive intelligence)
+- **Discover via meta-tool:** `xpay_discover(query: "USPTO patent competitive intelligence prior art")` on `https://mcp.xpay.sh/mcp?key=YOUR_XPAY_KEY`
 
-### Phase 1: Discover & Evaluate
-Use discovery tools to find target data.
-- **`search_single_patents`**: Query individual patents ($0.50) using `primary_cpc` (e.g., "G06", "H04"), `cross_domain_cpc`, or `keyword`. Returns lightweight ROI metadata and `patent_id`.
-- **`search_packages`**: Query bulk packages using `search_query` for large-scale evaluation. Returns `package_tag`.
+## Machine-readable discovery
 
-### Phase 2: Request Payment Instructions (402 Flow)
-Call the purchase tool with the target ID/Tag and network, but **LEAVE `tx_hash` EMPTY**.
-- **Tools**: `purchase_single_patent` or `verify_crypto_payment_and_deliver`.
-- **Args**: `{"patent_id": "...", "network": "polygon"}` or `{"package_tag": "...", "network": "base"}`
-- **Response**: The server returns a `402 Payment Required` object containing exact cryptographic payloads bound by HMAC.
+| File | URL |
+|------|-----|
+| llms.txt (xpay) | https://mirelia-structured-data-marketplace.mcp.xpay.sh/llms.txt |
+| skill.md (xpay) | https://mirelia-structured-data-marketplace.mcp.xpay.sh/skill.md |
+| mcp.json (xpay) | https://mirelia-structured-data-marketplace.mcp.xpay.sh/.well-known/mcp.json |
+| MCP Registry | `io.github.stagproject/mirelia-structured-data-marketplace` |
+| GitHub | https://github.com/stagproject/mirelia-structured-data-marketplace |
 
-### Phase 3: Execute & Claim
-Execute the payload strictly based on your wallet architecture:
-1. **EOA (Standard Wallet)**: Broadcast `transaction_payload`.
-2. **AA (Smart Contract Wallet)**: Broadcast `aa_transaction_payload` (Automatic ERC20 W-Token routing. Critical for Oasis network).
-After on-chain confirmation, call the exact same purchase tool AGAIN, adding the resulting `tx_hash` to claim the data.
+## Tools
 
-## 🧬 Data Dictionary & Strict Schema Definition
-To ensure zero-hallucination ingestion and seamless Vector DB/RAG integration, agents must adhere to this strict schema. Key evaluative fields include:
+- **search_single_patents** — USPTO patent search ($0.50/data on-chain). Args: `primary_cpc` (G06, H04, …), optional `keyword`, `cross_domain_cpc`, `min_score`, `limit`, `offset`.
+- **search_packages** — Bulk patent package catalog (10/100/1000 packs). Args: `search_query` (e.g. `G06_100`), `limit`.
+- **purchase_single_patent** — x402 payment flow for one patent. Step 1: call with `patent_id` + `network`, empty `tx_hash`. Step 2: broadcast `transaction_payload`. Step 3: recall with `tx_hash`.
+- **verify_crypto_payment_and_deliver** — Same 402 flow for bulk `package_tag`.
 
-- `id` (UUID): Internal unique identifier.
-- `patent_id` (String): Official publication number (e.g., "US12519999B2").
-- `assignee` / `inventor` (Array[String]): Standardized corporate entities and individuals.
-- `primary_cpc` (String): Main Cooperative Patent Classification code.
-- `secondary_cpcs` (Array[String]): Cross-domain classification codes.
-- `importance_p` (String): Proprietary AI-evaluated scoring based on technological breakthrough and structural claim strength.
-- `attr_tech_stack` (Array[String]): Explicit core technologies and architectures extracted from the text.
-- `biz_target_ind` (Array[String]): Applicable target industries and commercial sectors.
-- `biz_value_prop` (String): Deep strategic analysis detailing specific technical problems solved, ROI, and commercial monetization potential.
-- `r2_url` (String): Direct CDN link to the full raw JSON file.
-- `_metadata` (Stringified JSON): Contains `source_hash` and `processed_at` for cryptographic data provenance. Must be parsed by the agent.
+## Pricing
 
-### 🗃️ Full-Stack Raw Data Sample
-Verify your ingestion logic against this verbatim production record before purchase.
+- **Discovery (search_*):** low per-call fee via xpay credits (set in xpay dashboard; recommend $0.01 or free).
+- **Data purchase:** $0.50 USDC (or ROSE on Oasis) per single patent on-chain, plus package prices for bulk.
 
-```json
-{
-  "id": "1c724ae7-c738-447e-b233-4ae6c2185f37",
-  "patent_id": "US12519999B2",
-  "country_code": "US",
-  "assignee": [
-    "Sonos, Inc."
-  ],
-  "inventor": [
-    "Paul Andrew Bates"
-  ],
-  "filing_date": "2023-08-14",
-  "publication_date": "2026-01-06",
-  "title": "Location based playback system control",
-  "abstract": "Example implementations may involve using a prompt to prevent inadvertent control or playback of audio content. When a mobile device receives input data indicating a command to play back audio content on a first playback device, the mobile device determines whether the mobile device is in proximity to the first playback device...",
-  "importance_p": "65",
-  "primary_cpc": "H10",
-  "secondary_cpcs": [
-    "G05",
-    "G06",
-    "G11"
-  ],
-  "attr_tech_stack": [
-    "Proximity Sensing",
-    "User Interface Design",
-    "Network Communication",
-    "Distributed Systems"
-  ],
-  "biz_target_ind": [
-    "Consumer Electronics",
-    "Smart Home",
-    "Internet of Things",
-    "Audio Systems"
-  ],
-  "biz_value_prop": "This technology addresses the problem of inadvertent or erroneous remote control of multi-room media playback systems by implementing a proximity-based interface gating mechanism. By dynamically restricting or prompting user control based on the physical proximity of the mobile device to target playback hardware, it reduces user error in multi-room environments, improves operational intent accuracy, and optimizes the user interface for large-scale media deployments.",
-  "r2_url": "[https://cdn.mirelia.site/patents/en/uspto/2026/US12519999B2.json](https://cdn.mirelia.site/patents/en/uspto/2026/US12519999B2.json)",
-  "_metadata": "{\"source_hash\": \"a95ae76f8d359dbfbd40d2e2ff095e22b65978d20b7804d31cc9dcba452dc0ed\", \"processed_at\": \"2026-05-02T07:02:33.288016Z\", \"source_bundle\": \"USPTO\"}"
-}
+## Payment workflow (MPP v1.0)
 
-```
+1. Call purchase tool with empty `tx_hash` → receive `status: 402` and `transaction_payload`.
+2. Broadcast payload on `polygon`, `base`, or `oasis`.
+3. Call same tool with `tx_hash` to receive full JSON.
 
-## 🧠 Technological Scope (Semantic Routing Index)
+## Schema highlights
 
-Use this index to map user queries to the correct CPC codes for your `search_packages` queries. This server strictly specializes in the following high-value technological sectors:
+`patent_id`, `title`, `assignee`, `primary_cpc`, `secondary_cpcs`, `importance_p`, `attr_tech_stack`, `biz_target_ind`, `biz_value_prop`, `r2_url`, `_metadata`
 
-- **G (Physics & Computing):**
-- **G01:** Measuring, Testing, Sensors (e.g., LiDAR, Radar, ToF Sensors, Quantum Sensors).
-- **G05:** Control or Regulating Systems.
-- **G06:** Computing, Calculating, Counting (e.g., AI/ML, Data Processing, Computer Vision, Quantum Algorithms).
-- **G11:** Information Storage.
-- **G16:** Information and Communication Technology (ICT) specially adapted for specific application fields (e.g., Health Informatics, Bioinformatics).
+## CPC scope (G & H)
 
-
-- **H (Electricity & Communication):**
-- **H01:** Basic Electric Elements (e.g., Semiconductors, Solid-State Batteries, Quantum Hardware).
-- **H04:** Electric Communication Technique (e.g., 5G/6G, Network Security, Wireless Protocols, Cloud Collaboration).
-- **H10:** Semiconductor Devices, Electric Solid-State Devices (e.g., Advanced Memory, Photovoltaics).
+G01–G21 (physics, computing, sensors, AI/ML), H01–H10 (electricity, telecom, semiconductors). See GitHub README for full index.

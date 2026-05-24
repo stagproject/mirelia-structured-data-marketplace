@@ -1,15 +1,21 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
   "name": "mirelia-structured-data-marketplace",
-  "description": "Autonomous A2A marketplace providing AI-optimized USPTO patent JSON datasets for R&D agents. Specializes in IPC/CPC Sections G (Physics/Computing) & H (Electricity). Features discovery and instant M2M delivery via MPP v1.0 (402 Payment) workflow. Supports single patents ($0.50) and bulk. Implements EOA/AA dual-wallet routing on Base, Polygon (USDC), and Oasis (ROSE).",
+  "description": "USPTO patent MCP server: competitive intelligence, prior art, IP analytics. 3000+ AI-enriched JSON patents (CPC G/H). x402 on-chain purchase on Polygon, Base, Oasis. Listed on xpay.tools.",
   "keywords": [
-    "search",
-    "remote",
-    "database",
-    "blockchain",
-    "web3",
     "uspto",
-    "crypto"
+    "patent",
+    "prior-art",
+    "competitive-intelligence",
+    "ip-analytics",
+    "cpc",
+    "semiconductor",
+    "machine-learning",
+    "telecom",
+    "x402",
+    "mcp",
+    "search",
+    "database"
   ],
   "maintainers": [
     "stagproject"

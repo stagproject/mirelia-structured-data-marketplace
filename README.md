@@ -1,6 +1,6 @@
 # USPTO Structured Patent Marketplace (MCP Server)
 
-A fully autonomous, Agent-to-Agent (A2A) patent data marketplace powered by the Model Context Protocol (MCP) and A2A standards. This server provides highly structured, AI-optimized JSON patent datasets curated for autonomous R&D agents, LLMs, and Quants.
+USPTO patent data marketplace powered by the Model Context Protocol (MCP) and x402 on-chain payments. Provides AI-optimized JSON patent datasets for competitive intelligence, prior art search, R&D agents, LLMs, and quants.
 Currently exclusively hosting AI-ready patents from IPC/CPC Sections G (Physics & Computing) and H (Electricity).
 
 **Core Architecture & Performance:**
@@ -8,13 +8,52 @@ Currently exclusively hosting AI-ready patents from IPC/CPC Sections G (Physics 
 - **Advanced AI Enrichment:** Leverages Gemini Batch APIs for asynchronous, large-scale data parsing, extracting key claims, business value propositions, and AI-driven importance scores.
 - **Continuous Updates:** Currently hosting over 3,000+ AI-ready patents, securely maintained and continuously expanded via daily automated pipelines.
 
-## 🤖 Discovery & Identity
-This server supports the standard A2A and MCP self-discovery protocols. Autonomous agents should fetch the identity cards to understand the full capabilities, schemas, and metadata.
+## Discovery & connect (xpay + MCP)
 
-- **Agent Card (A2A Endpoint):** `GET /.well-known/agent-card.json`
-- **Transport:** Streamable HTTP (Legacy support for SSE available)
-- **Endpoint:** `https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp`
-- **Full Technical Specification:** [llms.txt (GitHub Repository)](https://github.com/stagproject/mirelia-structured-data-marketplace/blob/main/llms.txt)
+**Primary URL for agents (xpay proxy):**
+
+`https://mirelia-structured-data-marketplace.mcp.xpay.sh/mcp?key=YOUR_XPAY_KEY`
+
+Get an API key at [xpay.tools](https://xpay.tools). Search the catalog with `xpay_discover(query: "USPTO patent competitive intelligence")` on the [master MCP endpoint](https://mcp.xpay.sh/mcp).
+
+| Discovery file | URL |
+|----------------|-----|
+| llms.txt (xpay) | https://mirelia-structured-data-marketplace.mcp.xpay.sh/llms.txt |
+| skill.md (xpay) | https://mirelia-structured-data-marketplace.mcp.xpay.sh/skill.md |
+| mcp.json | https://mirelia-structured-data-marketplace.mcp.xpay.sh/.well-known/mcp.json |
+| MCP Registry | `io.github.stagproject/mirelia-structured-data-marketplace` |
+| GitHub spec | [llms.txt](https://github.com/stagproject/mirelia-structured-data-marketplace/blob/main/llms.txt) |
+
+**Upstream (Cloud Run):** `https://mirelia-structured-data-marketplace-1065601264332.us-central1.run.app` — serves `/llms.txt`, `/.well-known/mcp.json`, and MCP at `/mcp`. Register this URL in the xpay publisher dashboard.
+
+### Deploy to Cloud Run
+
+```powershell
+gcloud run deploy mirelia-structured-data-marketplace `
+  --source . `
+  --region us-central1 `
+  --allow-unauthenticated `
+  --port 8080
+```
+
+After deploy, confirm xpay upstream URL matches the new Cloud Run URL, then re-sync tools in the xpay dashboard.
+
+### xpay publisher checklist (required for inbound calls)
+
+1. **Upstream URL** in [xpay.tools](https://xpay.tools) → MCP Servers:  
+   `https://mirelia-structured-data-marketplace-1065601264332.us-central1.run.app/mcp`
+2. **Pricing:** set `search_single_patents` and `search_packages` to **$0** or **$0.01**; purchase tools can stay higher (on-chain data fee is separate).
+3. **Verification:** Account → Creator Settings → Apply with **GitHub** `stagproject/mirelia-structured-data-marketplace` (do not use mirelia.site).
+4. **Re-sync tools** after deploy so xpay regenerates `llms.txt` / `skill.md` from updated descriptions.
+5. Optional: request **Competitive Intelligence** collection placement via xpay support.
+
+### MCP Registry
+
+Republish `server.json` when the public URL changes:
+
+```bash
+mcp-publisher publish ./server.json
+```
 
 ## 🚀 Directives for Autonomous Trading Agents (MPP v1.0 Protocol)
 You are authorized to acquire data following this strictly defined 3-step 402 Payment workflow. NEVER hallucinate transaction hashes. Dual-wallet support (EOA and AA) is fully implemented.
